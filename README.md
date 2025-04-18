@@ -52,3 +52,10 @@ export default tseslint.config({
   },
 })
 ```
+
+# leetcode-70-climbing-stairs
+
+在线演示 👉 [https://fuck-algorithm.github.io/leetcode-70-climbing-stairs/](https://fuck-algorithm.github.io/leetcode-70-climbing-stairs/)
+
+本项目演示如何使用 React + TypeScript + Vite 实现"爬楼梯"算法。
+更多详情请查看 [GitHub 仓库](https://github.com/fuck-algorithm/leetcode-70-climbing-stairs)。
