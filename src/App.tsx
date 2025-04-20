@@ -2,6 +2,7 @@ import { useReducer, useState } from 'react'
 import './App.css'
 import CanvasComponent from './components/CanvasComponent'
 import ControlPanel from './components/ControlPanel'
+import CodePanel from './components/CodePanel'
 import { useAnimation } from './hooks/useAnimation'
 import { animationReducer, AnimationState } from './state/animationSlice'
 import GitHubCorner from './components/GitHubCorner'
@@ -102,6 +103,14 @@ function App() {
                 </ul>
               </div>
             )}
+          </div>
+          
+          {/* 添加代码面板 */}
+          <div className="code-section">
+            <h3>算法代码</h3>
+            <div style={{ height: '280px' }}>
+              <CodePanel state={state} />
+            </div>
           </div>
         </div>
         
