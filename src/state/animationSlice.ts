@@ -47,6 +47,7 @@ export const UPDATE_FORMULA = 'animation/updateFormula';
 export const SET_ALGORITHM = 'animation/setAlgorithm';
 export const SET_CURRENT_STEP = 'animation/setCurrentStep';
 export const SET_PLAYBACK_SPEED = 'animation/setPlaybackSpeed';
+export const INITIALIZE = 'animation/initialize';
 
 // 动作创建器
 export const playPause = () => ({ type: PLAY_PAUSE });
@@ -104,6 +105,16 @@ export function animationReducer(state = initialState, action: any): AnimationSt
       return { ...state, currentStep: newStep };
     case SET_PLAYBACK_SPEED:
       return { ...state, playbackSpeed: Math.max(0.1, action.payload) };
+    case INITIALIZE:
+      return { 
+        ...state, 
+        timeline: action.payload.timeline || [],
+        totalSteps: action.payload.timeline ? action.payload.timeline.length : 0,
+        staircase: action.payload.staircase || { nodes: [], links: [] },
+        matrix: action.payload.matrix || [],
+        formula: action.payload.formula || '',
+        currentStep: 0
+      };
     default:
       return state;
   }
