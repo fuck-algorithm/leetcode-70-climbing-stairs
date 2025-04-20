@@ -108,8 +108,8 @@ function App() {
         <div className="center-panel">
           <CanvasComponent 
             state={state}
-            width={600}
-            height={400}
+            width={window.innerWidth * 0.65}
+            height={window.innerHeight * 0.7}
           />
           <ControlPanel state={state} dispatch={dispatch} />
         </div>

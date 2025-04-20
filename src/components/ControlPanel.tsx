@@ -170,59 +170,63 @@ const styles = {
     padding: '10px',
     backgroundColor: '#f5f5f5',
     borderRadius: '4px',
-    marginBottom: '10px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    marginTop: '10px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    maxHeight: '30vh',
+    overflowY: 'auto' as const
   },
   section: {
-    marginBottom: '15px'
+    marginBottom: '10px'
   },
   heading: {
-    fontSize: '16px',
-    marginBottom: '8px'
+    fontSize: '14px',
+    marginBottom: '6px'
   },
   buttonGroup: {
     display: 'flex',
-    gap: '8px',
+    gap: '5px',
     flexWrap: 'wrap' as const
   },
   algorithmButton: {
-    padding: '6px 12px',
+    padding: '4px 8px',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s'
+    transition: 'background-color 0.3s',
+    fontSize: '12px'
   },
   controlButton: {
-    padding: '6px 12px',
+    padding: '4px 8px',
     backgroundColor: '#555',
     color: 'white',
     border: 'none',
     borderRadius: '4px',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    fontSize: '12px'
   },
   sliderContainer: {
-    marginTop: '15px',
+    marginTop: '8px',
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: '5px'
-  },
-  speedControlContainer: {
-    marginTop: '15px',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '5px'
+    gap: '3px'
   },
   slider: {
     width: '100%'
   },
+  speedControlContainer: {
+    marginTop: '5px',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '3px'
+  },
   description: {
-    marginTop: '15px',
-    padding: '10px',
+    padding: '8px',
     backgroundColor: '#fff',
     borderRadius: '4px',
     border: '1px solid #ddd',
     minHeight: '20px',
-    fontSize: '14px'
+    fontSize: '12px',
+    marginTop: '5px'
   }
 };
 
