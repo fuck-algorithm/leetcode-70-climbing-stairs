@@ -9,16 +9,42 @@ export function generateFormulaSolution(n: number): {
   result: number;
   timeline: AnimationTimeline[];
 } {
-  // 处理边界情况
-  if (n <= 0) return { result: 0, timeline: [] };
-  if (n === 1) return { result: 1, timeline: [] };
-  
   // 初始化时间线
   const timeline: AnimationTimeline[] = [];
+  let stepCounter = 0;
+  
+  // 处理边界情况
+  if (n <= 0) {
+    timeline.push({
+      timestamp: stepCounter++ * 1000,
+      description: "输入的阶数小于等于0，没有有效的爬楼梯方法",
+      visualChanges: {
+        nodeUpdates: [],
+        matrixUpdates: [],
+        formulaUpdate: "n <= 0，返回0"
+      },
+      interactionPoints: []
+    });
+    return { result: 0, timeline };
+  }
+  
+  if (n === 1) {
+    timeline.push({
+      timestamp: stepCounter++ * 1000,
+      description: "只有1阶楼梯，只有1种爬法",
+      visualChanges: {
+        nodeUpdates: [],
+        matrixUpdates: [],
+        formulaUpdate: "n = 1，返回1"
+      },
+      interactionPoints: []
+    });
+    return { result: 1, timeline };
+  }
   
   // 特征方程推导阶段
   timeline.push({
-    timestamp: 0,
+    timestamp: stepCounter++ * 1000,
     description: "特征方程推导",
     visualChanges: {
       nodeUpdates: [],
@@ -33,7 +59,7 @@ export function generateFormulaSolution(n: number): {
   const psi = (1 - Math.sqrt(5)) / 2;
   
   timeline.push({
-    timestamp: 1000,
+    timestamp: stepCounter++ * 1000,
     description: "求解特征方程",
     visualChanges: {
       nodeUpdates: [],
@@ -45,7 +71,7 @@ export function generateFormulaSolution(n: number): {
   
   // 通项公式推导阶段
   timeline.push({
-    timestamp: 2000,
+    timestamp: stepCounter++ * 1000,
     description: "通项公式推导",
     visualChanges: {
       nodeUpdates: [],
@@ -57,7 +83,7 @@ export function generateFormulaSolution(n: number): {
   
   // 确定系数阶段
   timeline.push({
-    timestamp: 3000,
+    timestamp: stepCounter++ * 1000,
     description: "确定系数",
     visualChanges: {
       nodeUpdates: [],
@@ -69,7 +95,7 @@ export function generateFormulaSolution(n: number): {
   
   // 最终公式阶段
   timeline.push({
-    timestamp: 4000,
+    timestamp: stepCounter++ * 1000,
     description: "最终公式",
     visualChanges: {
       nodeUpdates: [],
@@ -82,7 +108,7 @@ export function generateFormulaSolution(n: number): {
   // 最终结果计算阶段
   const result = calculateBinetFormula(n);
   timeline.push({
-    timestamp: 5000,
+    timestamp: stepCounter++ * 1000,
     description: "计算结果",
     visualChanges: {
       nodeUpdates: [],

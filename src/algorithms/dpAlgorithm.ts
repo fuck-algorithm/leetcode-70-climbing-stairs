@@ -9,12 +9,16 @@ export function generateDPSolution(n: number): {
   result: number;
   timeline: AnimationTimeline[];
 } {
+  // 初始化时间线
+  const timeline: AnimationTimeline[] = [];
+  let stepCounter = 0; // 添加步骤计数器
+
   // 处理边界情况
   if (n <= 0) {
     return {
       result: 0,
       timeline: [{
-        timestamp: 0,
+        timestamp: stepCounter++ * 1000,
         description: "输入的阶数小于等于0，没有有效的爬楼梯方法",
         visualChanges: {
           nodeUpdates: [
@@ -32,7 +36,7 @@ export function generateDPSolution(n: number): {
     return {
       result: 1,
       timeline: [{
-        timestamp: 0,
+        timestamp: stepCounter++ * 1000,
         description: "只有1阶楼梯，只有1种爬法",
         visualChanges: {
           nodeUpdates: [
@@ -52,12 +56,9 @@ export function generateDPSolution(n: number): {
   dp[0] = 1;
   dp[1] = 1;
   
-  // 初始化时间线
-  const timeline: AnimationTimeline[] = [];
-  
   // 初始化阶段的时间线
   timeline.push({
-    timestamp: 0,
+    timestamp: stepCounter++ * 1000,
     description: "初始化阶段，第 0 阶和第 1 阶各有 1 种爬法",
     visualChanges: {
       nodeUpdates: [
@@ -77,7 +78,7 @@ export function generateDPSolution(n: number): {
     
     // 添加到时间线
     timeline.push({
-      timestamp: i * 1000, // 时间戳按步骤递增
+      timestamp: stepCounter++ * 1000,
       description: `计算第 ${i} 阶的爬法数量`,
       visualChanges: {
         nodeUpdates: [
@@ -99,7 +100,7 @@ export function generateDPSolution(n: number): {
   
   // 滚动数组优化阶段
   timeline.push({
-    timestamp: (n + 1) * 1000,
+    timestamp: stepCounter++ * 1000,
     description: "通过滚动数组，我们将空间复杂度从 O(n) 优化到 O(1)",
     visualChanges: {
       nodeUpdates: [],
