@@ -47,20 +47,23 @@ export function useAnimation(
     }
     
     const { timeline } = solution;
-    const totalSteps = timeline.length; // 总步数等于时间线长度
+    console.log(`生成时间线，长度: ${timeline.length}`); // 添加日志
     
-    // 准备数据结构（这部分可能需要在 reducer 或 action 中处理，以确保状态一致性）
+    // 准备数据结构
     const nodes = [];
     const links = [];
     
+    // 初始化楼梯节点（当使用DP或矩阵时）
     if (state.currentAlgorithm !== 'formula') {
       for (let i = 0; i <= n; i++) {
         nodes.push({
           id: i,
           x: 50 + i * 80,
           y: 300 - Math.min(i * 40, 200),
-          value: i <= 1 ? 1 : 0 // 初始值
+          value: i <= 1 ? 1 : 0
         });
+        
+        // 添加连接（从每个节点到前两个节点）
         if (i >= 2) {
           links.push({ source: i - 1, target: i });
           links.push({ source: i - 2, target: i });
@@ -68,18 +71,16 @@ export function useAnimation(
       }
     }
     
-    // 构建初始状态更新对象 (Dispatch actions instead of direct object)
+    // 使用单一action更新所有状态
     dispatch({ 
-        type: 'animation/initialize', // Consider an initialization action
-        payload: { 
-            timeline,
-            totalSteps,
-            staircase: { nodes, links },
-            matrix: state.currentAlgorithm === 'matrix' ? [[1, 1], [1, 0]] : [],
-            formula: '' 
-        }
+      type: 'animation/initialize', 
+      payload: { 
+        timeline: timeline,
+        staircase: { nodes, links },
+        matrix: state.currentAlgorithm === 'matrix' ? [[1, 1], [1, 0]] : [],
+        formula: ''
+      }
     });
-    dispatch(setCurrentStep(0)); // 确保初始步骤为0
     
   }, [state.currentAlgorithm, n, dispatch]);
   
