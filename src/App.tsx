@@ -1,12 +1,15 @@
-import { useReducer, useState } from 'react'
+import { useReducer, useState, useCallback, useEffect } from 'react'
 import './App.css'
 import CanvasComponent from './components/CanvasComponent'
 import ControlPanel from './components/ControlPanel'
 import CodePanel from './components/CodePanel'
 import { useAnimation } from './hooks/useAnimation'
-import { animationReducer, AnimationState } from './state/animationSlice'
+import { animationReducer, AnimationState, INITIALIZE, AnimationTimeline } from './state/animationSlice'
 import GitHubCorner from './components/GitHubCorner'
 import BackToHot100 from './components/BackToHot100'
+import MatrixFastPower from './components/MatrixFastPower'
+import FormulaVisualizer from './components/FormulaVisualizer'
+import SimpleDPVisualizer from './components/dp/SimpleDPVisualizer'
 
 // 初始状态
 const initialState: AnimationState = {
@@ -18,7 +21,10 @@ const initialState: AnimationState = {
   matrix: [],
   formula: '',
   timeline: [],
-  playbackSpeed: 1.0
+  playbackSpeed: 1.0,
+  stepStatuses: [],
+  values: [],
+  animationInProgress: false
 };
 
 function App() {
@@ -27,6 +33,9 @@ function App() {
   
   // 楼梯阶数配置
   const [stairsCount, setStairsCount] = useState(6);
+  
+  // 当前算法的时间线
+  const [currentTimeline, setCurrentTimeline] = useState<AnimationTimeline | null>(null);
   
   // 使用动画钩子
   const { restartAnimation } = useAnimation(state, dispatch, stairsCount);
@@ -41,6 +50,132 @@ function App() {
     }
   };
   
+  // 处理生成解决方案
+  const handleGenerateSolution = useCallback((solution: { 
+    result: number; 
+    timeline: AnimationTimeline[];
+    stepsData?: {
+      stepStatuses: ('uncalculated' | 'calculating' | 'calculated')[];
+      values: number[];
+    };
+  }) => {
+    console.log("App 收到生成的解决方案:", {
+      hasResult: !!solution.result,
+      timelineLength: solution.timeline?.length || 0,
+      stepsDataValues: solution.stepsData?.values?.length || 0,
+      stepsDataStatuses: solution.stepsData?.stepStatuses?.length || 0
+    });
+    
+    // 验证接收到的数据
+    if (!solution.timeline || solution.timeline.length === 0) {
+      console.error("警告: 接收到的解决方案没有时间线数据!");
+      return;
+    }
+    
+    // 构建有效的payload，包含合理的默认值
+    const payload = {
+      totalSteps: solution.timeline.length,
+      values: solution.stepsData?.values || [],
+      stepStatuses: solution.stepsData?.stepStatuses || [],
+      timeline: solution.timeline
+    };
+    
+    console.log("初始化动画状态，payload信息:", {
+      totalSteps: payload.totalSteps,
+      valuesLength: payload.values.length,
+      statusesLength: payload.stepStatuses.length,
+      timelineLength: payload.timeline.length
+    });
+    
+    dispatch({ type: INITIALIZE, payload });
+  }, [dispatch]);
+  
+  // 选择算法类型
+  const handleSelectAlgorithm = (algorithm: 'dp' | 'matrix' | 'formula') => {
+    dispatch({ type: 'animation/setCurrentAlgorithm', payload: algorithm });
+    dispatch({ type: 'animation/resetAnimation' });
+    setTimeout(restartAnimation, 0);
+  };
+  
+  // 更新当前时间线
+  useEffect(() => {
+    if (state.timeline && state.timeline.length > 0 && state.currentStep < state.timeline.length) {
+      setCurrentTimeline(state.timeline[state.currentStep]);
+    } else {
+      setCurrentTimeline(null);
+    }
+  }, [state.timeline, state.currentStep]);
+  
+  const renderVisualization = () => {
+    switch (state.currentAlgorithm) {
+      case 'dp':
+        return (
+          <SimpleDPVisualizer
+            n={stairsCount}
+            state={state}
+            onGenerateSolution={handleGenerateSolution}
+            dispatch={dispatch}
+          />
+        );
+      case 'matrix':
+        return (
+          <MatrixFastPower 
+            n={stairsCount}
+            state={state}
+            currentTimeline={currentTimeline}
+          />
+        );
+      case 'formula':
+        return (
+          <FormulaVisualizer 
+            n={stairsCount}
+            state={state}
+            currentTimeline={currentTimeline}
+          />
+        );
+      default:
+        // 对于其他算法，暂时保留原始的可视化方式
+        return (
+          <>
+            <CanvasComponent 
+              state={state}
+              width={window.innerWidth * 0.65}
+              height={window.innerHeight * 0.7}
+            />
+            <ControlPanel state={state} dispatch={dispatch} />
+          </>
+        );
+    }
+  };
+  
+  // 渲染算法选择器
+  const renderAlgorithmSelector = () => {
+    const algorithms = [
+      { id: 'dp', name: '动态规划', color: '#4CAF50' },
+      { id: 'matrix', name: '矩阵快速幂', color: '#7E57C2' },
+      { id: 'formula', name: '通项公式', color: '#FFC107' }
+    ];
+    
+    return (
+      <div className="algorithm-selector">
+        {algorithms.map(algo => (
+          <button 
+            key={algo.id}
+            className={`algorithm-button ${state.currentAlgorithm === algo.id ? 'active' : ''}`}
+            style={{ 
+              borderColor: algo.color,
+              backgroundColor: state.currentAlgorithm === algo.id ? algo.color : 'transparent',
+              color: state.currentAlgorithm === algo.id ? 'white' : algo.color
+            }}
+            onClick={() => handleSelectAlgorithm(algo.id as 'dp' | 'matrix' | 'formula')}
+          >
+            {algo.name}
+          </button>
+        ))}
+      </div>
+    );
+  };
+  
   return (
     <div className="app-container">
       <BackToHot100 />
@@ -48,6 +183,7 @@ function App() {
       <header className="app-header">
         <h1>爬楼梯问题算法可视化</h1>
         <div className="stairs-config">
+          {renderAlgorithmSelector()}
           <label>
             楼梯阶数: 
             <input
@@ -115,12 +251,25 @@ function App() {
         </div>
         
         <div className="center-panel">
-          <CanvasComponent 
-            state={state}
-            width={window.innerWidth * 0.65}
-            height={window.innerHeight * 0.7}
-          />
-          <ControlPanel state={state} dispatch={dispatch} />
+          {/* 标题 */}
+          <h2 style={{
+            textAlign: 'center',
+            color: state.currentAlgorithm === 'dp' ? '#2196F3' : 
+                 state.currentAlgorithm === 'matrix' ? '#7E57C2' : 
+                 '#FF6F00',
+            margin: '0 0 20px 0',
+            padding: '10px',
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          }}>
+            {state.currentAlgorithm === 'dp' ? '动态规划解法' : 
+             state.currentAlgorithm === 'matrix' ? '矩阵快速幂解法' : 
+             '通项公式解法'} - 爬楼梯问题
+          </h2>
+          
+          {/* 渲染具体算法可视化 */}
+          {renderVisualization()}
         </div>
       </main>
     </div>

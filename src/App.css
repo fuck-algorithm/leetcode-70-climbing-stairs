@@ -86,6 +86,8 @@ body, html {
   background-color: #f8f9fa;
   border-radius: 4px;
   margin-bottom: 5px;
+  position: relative;
+  z-index: 10;
 }
 
 .app-header h1 {
@@ -119,6 +121,8 @@ body, html {
   padding: 5px;
   overflow-y: auto;
   border-right: 1px solid var(--border-color);
+  position: relative;
+  z-index: 5;
 }
 
 .left-panel h2 {
@@ -137,8 +141,10 @@ body, html {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 5px;
+  padding: 10px 10px 10px 20px;
   overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 .center-panel svg {

@@ -29,58 +29,87 @@ export function useAnimation(
     lastTimeStampRef.current = 0;
     stepStartTimeRef.current = 0;
     
-    let solution;
+    try {
+      console.log("useAnimation - 开始生成解决方案，算法:", state.currentAlgorithm, "n:", n);
+      
+      let solution;
+      let values: number[] = [];
+      let stepStatuses: ('uncalculated' | 'calculating' | 'calculated')[] = [];
+      
+      // 根据当前选择的算法生成解决方案
+      switch (state.currentAlgorithm) {
+        case 'dp':
+          solution = generateDPSolution(n);
+          // DP算法返回包含stepsData的对象
+          values = solution.stepsData?.values || [];
+          stepStatuses = solution.stepsData?.stepStatuses || [];
+          break;
+        case 'matrix':
+          solution = generateMatrixSolution(n);
+          // 矩阵和公式算法不返回stepsData，创建空的默认值
+          values = Array(n + 1).fill(0);
+          stepStatuses = Array(n + 1).fill('uncalculated');
+          break;
+        case 'formula':
+          solution = generateFormulaSolution(n);
+          // 矩阵和公式算法不返回stepsData，创建空的默认值
+          values = Array(n + 1).fill(0);
+          stepStatuses = Array(n + 1).fill('uncalculated');
+          break;
+        default:
+          solution = generateDPSolution(n);
+          values = solution.stepsData?.values || [];
+          stepStatuses = solution.stepsData?.stepStatuses || [];
+      }
+      
+      // 验证解决方案数据
+      if (!solution || !solution.timeline || solution.timeline.length === 0) {
+        console.error("useAnimation - 生成的解决方案无效:", solution);
+        return;
+      }
     
-    // 根据当前选择的算法生成解决方案
-    switch (state.currentAlgorithm) {
-      case 'dp':
-        solution = generateDPSolution(n);
-        break;
-      case 'matrix':
-        solution = generateMatrixSolution(n);
-        break;
-      case 'formula':
-        solution = generateFormulaSolution(n);
-        break;
-      default:
-        solution = generateDPSolution(n);
-    }
+      const { timeline } = solution;
+      console.log(`useAnimation - 生成时间线成功，长度: ${timeline.length}`);
     
-    const { timeline } = solution;
-    console.log(`生成时间线，长度: ${timeline.length}`); // 添加日志
+      // 准备数据结构
+      const nodes = [];
+      const links = [];
     
-    // 准备数据结构
-    const nodes = [];
-    const links = [];
-    
-    // 初始化楼梯节点（当使用DP或矩阵时）
-    if (state.currentAlgorithm !== 'formula') {
-      for (let i = 0; i <= n; i++) {
-        nodes.push({
-          id: i,
-          x: 50 + i * 80,
-          y: 300 - Math.min(i * 40, 200),
-          value: i <= 1 ? 1 : 0
-        });
-        
-        // 添加连接（从每个节点到前两个节点）
-        if (i >= 2) {
-          links.push({ source: i - 1, target: i });
-          links.push({ source: i - 2, target: i });
+      // 初始化楼梯节点（当使用DP或矩阵时）
+      if (state.currentAlgorithm !== 'formula') {
+        for (let i = 0; i <= n; i++) {
+          nodes.push({
+            id: i,
+            x: 50 + i * 80,
+            y: 300 - Math.min(i * 40, 200),
+            value: i <= 1 ? 1 : 0
+          });
+          
+          // 添加连接（从每个节点到前两个节点）
+          if (i >= 2) {
+            links.push({ source: i - 1, target: i });
+            links.push({ source: i - 2, target: i });
+          }
         }
       }
-    }
     
-    // 使用单一action更新所有状态
-    dispatch({ 
-      type: 'animation/initialize', 
-      payload: { 
-        timeline: timeline,
-        staircase: { nodes, links },
-        matrix: state.currentAlgorithm === 'matrix' ? [[1, 1], [1, 0]] : [],
-        formula: ''
-      }
-    });
+      // 使用单一action更新所有状态
+      dispatch({ 
+        type: 'animation/initialize', 
+        payload: { 
+          totalSteps: timeline.length,
+          timeline: timeline,
+          values: values,
+          stepStatuses: stepStatuses,
+          staircase: { nodes, links },
+          matrix: state.currentAlgorithm === 'matrix' ? [[1, 1], [1, 0]] : [],
+          formula: ''
+        }
+      });
+      
+    } catch (error) {
+      console.error("useAnimation - 生成解决方案时出错:", error);
+    }
     
   }, [state.currentAlgorithm, n, dispatch]);
   
