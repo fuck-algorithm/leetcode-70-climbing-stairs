@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { AnimationState, AnimationTimeline } from '../state/animationSlice';
 
-// 主容器
+// 主容器 - 使用蓝色主题
 const VisualizerContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -11,7 +11,7 @@ const VisualizerContainer = styled.div`
   align-items: center;
   padding: 20px;
   overflow: auto;
-  background: radial-gradient(circle at 50% 50%, rgba(237, 231, 246, 0.3), rgba(179, 157, 219, 0.1));
+  background: radial-gradient(circle at 50% 50%, rgba(227, 242, 253, 0.3), rgba(187, 222, 251, 0.1));
 `;
 
 // 算法步骤区域
@@ -32,12 +32,12 @@ const Matrix3DContainer = styled.div<{ active?: boolean }>`
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
   
   ${props => props.active && `
-    filter: drop-shadow(0 8px 16px rgba(103, 58, 183, 0.4));
+    filter: drop-shadow(0 8px 16px rgba(33, 150, 243, 0.4));
     transform: scale(1.05);
   `}
 `;
 
-// 矩阵容器
+// 矩阵容器 - 使用蓝色
 const MatrixWrapper = styled.div<{ isPowered?: boolean; power?: number }>`
   display: inline-grid;
   grid-template-columns: repeat(2, 50px);
@@ -45,7 +45,7 @@ const MatrixWrapper = styled.div<{ isPowered?: boolean; power?: number }>`
   gap: 2px;
   padding: 10px;
   border-radius: 8px;
-  background-color: ${props => props.isPowered ? '#7E57C2' : '#9575CD'};
+  background-color: ${props => props.isPowered ? '#1976D2' : '#42A5F5'};
   position: relative;
   transform-style: preserve-3d;
   transform: rotateX(10deg) rotateY(-5deg);
@@ -62,7 +62,7 @@ const MatrixWrapper = styled.div<{ isPowered?: boolean; power?: number }>`
     left: 0;
     font-size: 16px;
     font-weight: bold;
-    color: #512DA8;
+    color: #1565C0;
     text-shadow: 0 1px 2px rgba(0,0,0,0.2);
   }
 `;
@@ -74,7 +74,7 @@ const MatrixCell = styled.div<{ highlight?: boolean; calculating?: boolean }>`
   align-items: center;
   width: 100%;
   height: 100%;
-  background-color: ${props => props.highlight ? '#E1BEE7' : 'white'};
+  background-color: ${props => props.highlight ? '#BBDEFB' : 'white'};
   border-radius: 4px;
   font-weight: ${props => props.highlight ? 'bold' : 'normal'};
   font-size: 16px;
@@ -91,7 +91,7 @@ const MatrixCell = styled.div<{ highlight?: boolean; calculating?: boolean }>`
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(90deg, transparent, rgba(103, 58, 183, 0.2), transparent);
+      background: linear-gradient(90deg, transparent, rgba(33, 150, 243, 0.2), transparent);
       animation: calculating 1.5s infinite;
     }
     
@@ -120,7 +120,7 @@ const BinaryContainer = styled.div`
   width: 100%;
 `;
 
-// 单个二进制位
+// 单个二进制位 - 使用蓝色
 const BinaryBit = styled.div<{ active?: boolean; index: number }>`
   width: 40px;
   height: 40px;
@@ -128,12 +128,12 @@ const BinaryBit = styled.div<{ active?: boolean; index: number }>`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: ${props => props.active ? '#7E57C2' : '#E0E0E0'};
+  background-color: ${props => props.active ? '#1976D2' : '#E0E0E0'};
   color: ${props => props.active ? 'white' : '#616161'};
   border-radius: 50%;
   font-weight: bold;
   font-size: 16px;
-  box-shadow: ${props => props.active ? '0 4px 8px rgba(103, 58, 183, 0.4)' : '0 2px 4px rgba(0,0,0,0.1)'};
+  box-shadow: ${props => props.active ? '0 4px 8px rgba(33, 150, 243, 0.4)' : '0 2px 4px rgba(0,0,0,0.1)'};
   transition: all 0.3s ease;
   position: relative;
   
@@ -147,7 +147,7 @@ const BinaryBit = styled.div<{ active?: boolean; index: number }>`
   
   &:hover {
     transform: translateY(-3px);
-    box-shadow: ${props => props.active ? '0 6px 12px rgba(103, 58, 183, 0.5)' : '0 4px 8px rgba(0,0,0,0.2)'};
+    box-shadow: ${props => props.active ? '0 6px 12px rgba(33, 150, 243, 0.5)' : '0 4px 8px rgba(0,0,0,0.2)'};
   }
 `;
 
@@ -164,7 +164,7 @@ const MatrixMultiplicationArea = styled.div`
 const OperatorSign = styled.div`
   font-size: 24px;
   margin: 0 15px;
-  color: #512DA8;
+  color: #1565C0;
   font-weight: bold;
 `;
 
@@ -182,7 +182,7 @@ const ResultArrow = styled.div`
     left: 0;
     width: 100%;
     height: 4px;
-    background-color: #512DA8;
+    background-color: #1565C0;
     transform: translateY(-50%);
   }
   
@@ -193,8 +193,8 @@ const ResultArrow = styled.div`
     right: 0;
     width: 12px;
     height: 12px;
-    border-top: 4px solid #512DA8;
-    border-right: 4px solid #512DA8;
+    border-top: 4px solid #1565C0;
+    border-right: 4px solid #1565C0;
     transform: translateY(-50%) rotate(45deg);
   }
 `;
@@ -214,7 +214,7 @@ const ExplanationPanel = styled.div`
 // 步骤标题
 const StepTitle = styled.h3`
   font-size: 18px;
-  color: #512DA8;
+  color: #1565C0;
   margin-bottom: 10px;
 `;
 
@@ -250,7 +250,7 @@ const ProgressIndicator = styled.div`
 const Progress = styled.div<{ percent: number }>`
   height: 100%;
   width: ${props => props.percent}%;
-  background-color: #7E57C2;
+  background-color: #2196F3;
   border-radius: 3px;
   transition: width 0.3s ease;
 `;
@@ -264,9 +264,6 @@ interface MatrixFastPowerProps {
 const MatrixFastPower: React.FC<MatrixFastPowerProps> = ({ n, state, currentTimeline }) => {
   // 基础矩阵 [[1,1],[1,0]]
   const baseMatrix = [[1, 1], [1, 0]];
-  
-  // 当前展示的矩阵幂次
-  const [powers, setPowers] = useState<number[]>([]);
   
   // 二进制展示
   const [binaryBits, setBinaryBits] = useState<number[]>([]);
@@ -290,16 +287,7 @@ const MatrixFastPower: React.FC<MatrixFastPowerProps> = ({ n, state, currentTime
     // 将每一位转换为数字
     const bits = binaryStr.split('').map(bit => parseInt(bit, 10));
     
-    // 计算需要的幂次
-    const requiredPowers = [];
-    for (let i = 0; i < bits.length; i++) {
-      if (bits[i] === 1) {
-        requiredPowers.push(bits.length - 1 - i);
-      }
-    }
-    
     setBinaryBits(bits);
-    setPowers(requiredPowers);
   }, [n]);
   
   // 根据当前步骤更新显示
@@ -321,7 +309,7 @@ const MatrixFastPower: React.FC<MatrixFastPowerProps> = ({ n, state, currentTime
           // 更新结果矩阵
           const power = Math.floor(step / 3);
           if (power < binaryBits.length && binaryBits[binaryBits.length - 1 - power] === 1) {
-            setResultMatrix(matrixMultiply(resultMatrix, intermediateMatrix));
+            setResultMatrix(prev => matrixMultiply(prev, intermediateMatrix));
           }
         }
       }
@@ -347,7 +335,7 @@ const MatrixFastPower: React.FC<MatrixFastPowerProps> = ({ n, state, currentTime
   };
   
   // 辅助函数：矩阵快速幂
-  const matrixPower = (matrix: number[][], power: number) => {
+  const matrixPower = (matrix: number[][], power: number): number[][] => {
     if (power === 0) {
       return [[1, 0], [0, 1]]; // 单位矩阵
     }
@@ -471,4 +459,4 @@ const MatrixFastPower: React.FC<MatrixFastPowerProps> = ({ n, state, currentTime
   );
 };
 
-export default MatrixFastPower; 
+export default MatrixFastPower;
