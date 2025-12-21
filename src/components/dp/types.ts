@@ -29,4 +29,11 @@ export interface GuidePanelProps {
   setShowingGuide: (show: boolean) => void;
 }
 
-export type ClimberPosition = 'bottom' | 'step1' | 'step2'; 
+export type ClimberPosition = 'bottom' | 'step1' | 'step2';
+
+export interface StairPosition {
+  x: number;
+  y: number;
+  centerX: number;
+  centerY: number;
+} 

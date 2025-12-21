@@ -1,13 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { AnimationTimeline } from '../../../state/animationSlice';
 import { CLIMBER_STATE, ANIMATION_PHASE } from '../constants';
 
 interface ClimberStateUpdateProps {
   currentTimeline: AnimationTimeline | null;
-  stepStatuses: ('uncalculated' | 'calculating' | 'calculated')[] | undefined;
   stairsPositions: { x: number, y: number }[];
   currentStep: number;
-  currentStairIndex: number;
   animationInProgress: boolean;
   setCalculatingStep: (step: number | null) => void;
   setClimberState: (state: number) => void;
@@ -15,9 +13,7 @@ interface ClimberStateUpdateProps {
   setShowBubble: (show: boolean) => void;
   setAnimationInProgress: (inProgress: boolean) => void;
   setClimbType: (type: 1 | 2 | null) => void;
-  setClimberPathPoints: (points: {x: number, y: number}[]) => void;
   setAnimationPhase: (phase: ANIMATION_PHASE) => void;
-  setAnimationStartTime: (time: number) => void;
   setAnimationProgress: (progress: number) => void;
   setCurrentStairIndex: (index: number) => void;
   setClimberPosition: (position: { x: number, y: number }) => void;
@@ -27,10 +23,8 @@ interface ClimberStateUpdateProps {
 // 小人状态更新钩子 - 完全重写以确保小人只受进度条控制
 export const useClimberStateUpdate = ({
   currentTimeline,
-  stepStatuses,
   stairsPositions,
   currentStep,
-  currentStairIndex,
   animationInProgress,
   setCalculatingStep,
   setClimberState,
@@ -38,58 +32,12 @@ export const useClimberStateUpdate = ({
   setShowBubble,
   setAnimationInProgress,
   setClimbType,
-  setClimberPathPoints,
   setAnimationPhase,
-  setAnimationStartTime,
   setAnimationProgress,
   setCurrentStairIndex,
   setClimberPosition,
   forceRender
 }: ClimberStateUpdateProps) => {
-  
-  // 将这个函数保留用于生成路径点，但只在我们显式调用时使用
-  const generatePathPoints = (startIndex: number, endIndex: number): {x: number, y: number}[] => {
-    if (startIndex >= stairsPositions.length || endIndex >= stairsPositions.length) {
-      console.error("索引超出范围:", startIndex, endIndex, stairsPositions.length);
-      return [];
-    }
-    
-    const startPos = {
-      x: stairsPositions[startIndex].x,
-      y: stairsPositions[startIndex].y - 30
-    };
-    
-    const endPos = {
-      x: stairsPositions[endIndex].x,
-      y: stairsPositions[endIndex].y - 30
-    };
-    
-    // 创建更加平滑的曲线路径
-    const pathPoints = [];
-    const steps = 40; // 增加路径点数量以获得更平滑的动画
-    
-    // 计算控制点 - 使用二次贝塞尔曲线
-    // 在起点和终点之间的高点
-    const controlX = (startPos.x + endPos.x) / 2;
-    const controlY = Math.min(startPos.y, endPos.y) - 80; // 向上弯曲
-    
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      
-      // 使用贝塞尔曲线计算点的位置
-      const x = Math.pow(1-t, 2) * startPos.x + 
-                2 * (1-t) * t * controlX + 
-                Math.pow(t, 2) * endPos.x;
-      
-      const y = Math.pow(1-t, 2) * startPos.y + 
-                2 * (1-t) * t * controlY + 
-                Math.pow(t, 2) * endPos.y;
-      
-      pathPoints.push({ x, y });
-    }
-    
-    return pathPoints;
-  };
   
   // 唯一保留的useEffect：当步骤或时间线变化时，更新小人位置
   // 这是小人位置更新的唯一源头，确保它完全受进度条控制

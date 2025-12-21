@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { AnimationTimeline } from '../../state/animationSlice';
 import { CLIMBER_STATE, ANIMATION_PHASE } from './constants';
 import { drawStairs } from './drawers/StairDrawer';
@@ -6,7 +6,6 @@ import { SillyClimberDrawer } from './drawers/SillyClimberDrawer';
 import { useClimberAnimation } from './hooks/useClimberAnimation';
 import { useStairInitialization } from './hooks/useStairInitialization';
 import { useClimberStateUpdate } from './hooks/useClimberStateUpdate';
-import { easeInOutQuad } from './utils';
 
 interface AnimatedClimberProps {
   n: number;
@@ -34,7 +33,7 @@ const AnimatedClimber: React.FC<AnimatedClimberProps> = ({
   const [climberState, setClimberState] = useState(CLIMBER_STATE.STANDING);
   // 初始位置设在底部
   const [climberPosition, setClimberPosition] = useState({ x: width / 2, y: height - 90 });
-  const [targetPosition, setTargetPosition] = useState({ x: width / 2, y: height - 90 });
+  const [, setTargetPosition] = useState({ x: width / 2, y: height - 90 });
   const [stairsPositions, setStairsPositions] = useState<{ x: number, y: number }[]>([]);
   const [calculatingStep, setCalculatingStep] = useState<number | null>(null);
   const [bubbleText, setBubbleText] = useState('');
@@ -49,7 +48,6 @@ const AnimatedClimber: React.FC<AnimatedClimberProps> = ({
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const forceRender = useRef<number>(0); // 强制渲染引用
-  const lastCalcStepRef = useRef<number | null>(null); // 上一次计算的楼梯阶数
   const prevStepRef = useRef<number>(currentStep); // 记录上一次的步骤，避免不必要的更新
   const rafIdRef = useRef<number | null>(null); // 用于存储requestAnimationFrame ID
   const renderTimeRef = useRef<number>(0); // 记录上次渲染时间，用于限制渲染频率
@@ -157,10 +155,8 @@ const AnimatedClimber: React.FC<AnimatedClimberProps> = ({
   // 使用小人状态更新钩子
   useClimberStateUpdate({
     currentTimeline,
-    stepStatuses,
     stairsPositions,
     currentStep,
-    currentStairIndex,
     animationInProgress,
     setCalculatingStep,
     setClimberState,
@@ -168,9 +164,7 @@ const AnimatedClimber: React.FC<AnimatedClimberProps> = ({
     setShowBubble,
     setAnimationInProgress,
     setClimbType,
-    setClimberPathPoints,
     setAnimationPhase,
-    setAnimationStartTime,
     setAnimationProgress,
     setCurrentStairIndex,
     setClimberPosition,
@@ -178,7 +172,7 @@ const AnimatedClimber: React.FC<AnimatedClimberProps> = ({
   });
 
   // 使用动画钩子
-  const { animationRef } = useClimberAnimation({
+  useClimberAnimation({
     isInitialized,
     animationInProgress,
     animationPhase,

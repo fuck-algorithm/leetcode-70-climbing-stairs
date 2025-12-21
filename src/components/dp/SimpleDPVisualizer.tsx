@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { AnimationTimeline, INITIALIZE, playPause, resetAnimation, setCurrentStep, setPlaybackSpeed, setAnimationState } from '../../state/animationSlice';
+import { setAnimationState } from '../../state/animationSlice';
 import { generateDPSolution } from '../../algorithms/dpAlgorithm';
 import AnimatedClimber from './AnimatedClimber';
 import styled from 'styled-components';

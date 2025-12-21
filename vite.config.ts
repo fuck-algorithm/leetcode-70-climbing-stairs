@@ -5,6 +5,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/leetcode-70-climbing-stairs/',
+  server: {
+    port: 56104
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',

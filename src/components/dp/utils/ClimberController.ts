@@ -24,8 +24,8 @@ export interface ClimberAnimationOptions {
 // 小人控制器类
 export class ClimberController {
   private character: ShadiaoCharacter;
-  private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
+  private canvas!: HTMLCanvasElement;
+  private ctx!: CanvasRenderingContext2D;
   private animationPhase: number = ANIMATION_PHASE.NONE;
   private animationProgress: number = 0;
   private climberState: number = CLIMBER_STATE.STANDING;

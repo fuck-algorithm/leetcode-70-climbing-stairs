@@ -10,6 +10,9 @@ import BackToHot100 from './components/BackToHot100'
 import MatrixFastPower from './components/MatrixFastPower'
 import FormulaVisualizer from './components/FormulaVisualizer'
 import SimpleDPVisualizer from './components/dp/SimpleDPVisualizer'
+import AlgorithmThoughts from './components/AlgorithmThoughts'
+import DataInput from './components/DataInput'
+import WeChatGroup from './components/WeChatGroup'
 
 // 初始状态
 const initialState: AnimationState = {
@@ -27,6 +30,9 @@ const initialState: AnimationState = {
   animationInProgress: false
 };
 
+// LeetCode题目链接
+const LEETCODE_URL = 'https://leetcode.cn/problems/climbing-stairs/';
+
 function App() {
   // 使用useReducer代替Redux，因为是单个文件应用
   const [state, dispatch] = useReducer(animationReducer, initialState);
@@ -40,9 +46,8 @@ function App() {
   // 使用动画钩子
   const { restartAnimation } = useAnimation(state, dispatch, stairsCount);
   
-  const handleStairsCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const count = parseInt(e.target.value, 10);
-    if (count >= 1 && count <= 20) {
+  const handleStairsCountChange = (count: number) => {
+    if (count >= 1 && count <= 45) {
       setStairsCount(count);
       // 重置和初始化动画
       dispatch({ type: 'animation/resetAnimation' });
@@ -152,8 +157,8 @@ function App() {
   const renderAlgorithmSelector = () => {
     const algorithms = [
       { id: 'dp', name: '动态规划', color: '#4CAF50' },
-      { id: 'matrix', name: '矩阵快速幂', color: '#7E57C2' },
-      { id: 'formula', name: '通项公式', color: '#FFC107' }
+      { id: 'matrix', name: '矩阵快速幂', color: '#2196F3' },
+      { id: 'formula', name: '通项公式', color: '#FF9800' }
     ];
     
     return (
@@ -180,23 +185,29 @@ function App() {
     <div className="app-container">
       <BackToHot100 />
       <GitHubCorner />
+      <AlgorithmThoughts algorithm={state.currentAlgorithm} />
+      <WeChatGroup />
+      
       <header className="app-header">
-        <h1>爬楼梯问题算法可视化</h1>
-        <div className="stairs-config">
-          {renderAlgorithmSelector()}
-          <label>
-            楼梯阶数: 
-            <input
-              type="number"
-              min="1"
-              max="20"
-              value={stairsCount}
-              onChange={handleStairsCountChange}
-              className="stairs-input"
-            />
-          </label>
-        </div>
+        <a 
+          href={LEETCODE_URL} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="title-link"
+        >
+          <h1>70. 爬楼梯 - 算法可视化</h1>
+        </a>
       </header>
+      
+      <div className="input-row">
+        <DataInput 
+          value={stairsCount} 
+          onChange={handleStairsCountChange}
+          min={1}
+          max={20}
+        />
+        {renderAlgorithmSelector()}
+      </div>
       
       <main className="app-content">
         <div className="left-panel">
@@ -254,18 +265,19 @@ function App() {
           {/* 标题 */}
           <h2 style={{
             textAlign: 'center',
-            color: state.currentAlgorithm === 'dp' ? '#2196F3' : 
-                 state.currentAlgorithm === 'matrix' ? '#7E57C2' : 
-                 '#FF6F00',
-            margin: '0 0 20px 0',
-            padding: '10px',
+            color: state.currentAlgorithm === 'dp' ? '#4CAF50' : 
+                 state.currentAlgorithm === 'matrix' ? '#2196F3' : 
+                 '#FF9800',
+            margin: '0 0 10px 0',
+            padding: '8px',
             backgroundColor: 'white',
             borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            fontSize: '18px'
           }}>
             {state.currentAlgorithm === 'dp' ? '动态规划解法' : 
              state.currentAlgorithm === 'matrix' ? '矩阵快速幂解法' : 
-             '通项公式解法'} - 爬楼梯问题
+             '通项公式解法'}
           </h2>
           
           {/* 渲染具体算法可视化 */}
