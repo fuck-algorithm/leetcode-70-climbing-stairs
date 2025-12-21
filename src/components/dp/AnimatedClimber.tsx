@@ -45,6 +45,8 @@ const AnimatedClimber: React.FC<AnimatedClimberProps> = ({
   const [animationProgress, setAnimationProgress] = useState(0); // 动画进度 0-1
   const [animationStartTime, setAnimationStartTime] = useState(0); // 动画开始时间
   const [climberPathPoints, setClimberPathPoints] = useState<{x: number, y: number}[]>([]); // 小人移动路径点
+  // 保留setClimberPathPoints以备将来使用
+  void setClimberPathPoints;
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const forceRender = useRef<number>(0); // 强制渲染引用

@@ -80,7 +80,7 @@ export const useClimberAnimation = ({
         }
         break;
         
-      case ANIMATION_PHASE.CLIMBING:
+      case ANIMATION_PHASE.CLIMBING: {
         // 爬楼梯阶段
         // 动画持续时间：爬1阶=0.8秒，爬2阶=1.2秒
         const duration = climbType === 1 ? 800 : 1200;
@@ -148,6 +148,7 @@ export const useClimberAnimation = ({
           }
         }
         break;
+      }
         
       case ANIMATION_PHASE.REACHED_TOP:
         // 到达顶部后庆祝0.8秒
@@ -199,8 +200,9 @@ export const useClimberAnimation = ({
       return;
     }
     
-    const animateClimber = (time: number) => {
+    const animateClimber = (_time: number) => {
       const now = Date.now();
+      void _time; // 保留参数以符合requestAnimationFrame签名
       
       // 更新动画状态 - 使用防抖动版本
       debouncedUpdateAnimation(now);

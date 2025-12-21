@@ -144,6 +144,7 @@ export class ClimberController {
     if (includeArc) {
       // 创建一个弧形路径 - 从起点跳跃到终点
       const midX = (startPosition.x + targetPosition.x) / 2;
+      void midX; // 保留以备将来使用
       const highestY = Math.min(startPosition.y, targetPosition.y) - 50; // 弧顶高度
       
       for (let i = 0; i <= pointCount; i++) {

@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
-import { AnimationTimeline } from '../../../state/animationSlice';
+import { AnimationTimeline, AnimationState } from '../../../state/animationSlice';
 import { ClimberPosition } from '../types';
 
 /**
  * 确定小人的位置和动作状态
  */
 export const useClimberPosition = (
-  state: any,
+  state: AnimationState,
   currentTimeline: AnimationTimeline | null
 ) => {
   return useMemo(() => {

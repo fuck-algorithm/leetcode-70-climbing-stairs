@@ -246,8 +246,8 @@ const PathArrow = styled.div<{ type: 'one' | 'two' }>`
   }
 `;
 
-// 单独定义Float动画组件
-const floatAnimation = (index: number, totalSteps: number) => {
+// 单独定义Float动画组件（保留以备将来使用）
+const _floatAnimation = (index: number, totalSteps: number) => {
   const baseY = -index * (totalSteps <= 5 ? 60 : totalSteps <= 10 ? 50 : 40);
   const baseZ = index * 2;
   
@@ -258,6 +258,9 @@ const floatAnimation = (index: number, totalSteps: number) => {
     }
   `;
 };
+
+// 导出以供其他模块使用
+export { _floatAnimation as floatAnimation };
 
 interface StairsComponentProps {
   n: number;

@@ -272,7 +272,7 @@ export const drawStar = (
   spikes: number
 ) => {
   let rotation = Math.PI / 2 * 3;
-  let step = Math.PI / spikes;
+  const step = Math.PI / spikes;
   
   ctx.fillStyle = '#FFEB3B';
   ctx.beginPath();

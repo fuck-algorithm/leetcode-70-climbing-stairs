@@ -369,7 +369,16 @@ interface FormulaVisualizerProps {
 // 通项公式可视化组件
 const FormulaVisualizer: React.FC<FormulaVisualizerProps> = ({ n, state, currentTimeline }) => {
   const [detailLevel, setDetailLevel] = useState<'simple' | 'detailed' | 'expert'>('simple');
-  const [chartData, setChartData] = useState<any>(null);
+  const [chartData, setChartData] = useState<{
+    labels: string[];
+    datasets: {
+      label: string;
+      data: number[];
+      borderColor: string;
+      backgroundColor: string;
+      tension: number;
+    }[];
+  } | null>(null);
   
   // 黄金比例常数
   const PHI = (1 + Math.sqrt(5)) / 2; // 约等于1.618...

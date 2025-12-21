@@ -1,4 +1,4 @@
-import { ANIMATION_PHASE, CLIMBER_STATE, COLORS } from '../constants';
+import { ANIMATION_PHASE, CLIMBER_STATE } from '../constants';
 import { drawSpeechBubble } from './BubbleDrawer';
 
 /**
@@ -599,7 +599,7 @@ export class SillyClimberDrawer {
   private drawStar(x: number, y: number, radius: number, spikes: number): void {
     const ctx = this.ctx;
     let rotation = Math.PI / 2 * 3;
-    let step = Math.PI / spikes;
+    const step = Math.PI / spikes;
     
     ctx.beginPath();
     ctx.moveTo(x, y - radius);
@@ -700,8 +700,11 @@ export class SillyClimberDrawer {
   /**
    * 绘制攀爬动作特效
    */
-  private drawClimbingEffect(x: number, y: number, type: 1 | 2, progress: number, timestamp: number): void {
+  private drawClimbingEffect(x: number, y: number, type: 1 | 2, progress: number, _timestamp: number): void {
     const ctx = this.ctx;
+    // 保留_timestamp以备将来使用
+    void _timestamp;
+    void progress;
     
     // 绘制动作线 - 表示速度和方向
     ctx.strokeStyle = 'rgba(255, 165, 0, 0.6)';

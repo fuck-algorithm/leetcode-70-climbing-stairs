@@ -365,7 +365,7 @@ export class ShadiaoCharacter {
   // 绘制星星
   private drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, spikes: number): void {
     let rot = Math.PI / 2 * 3;
-    let step = Math.PI / spikes;
+    const stepAngle = Math.PI / spikes;
     ctx.beginPath();
     ctx.moveTo(cx, cy - size);
     
@@ -373,12 +373,12 @@ export class ShadiaoCharacter {
       let x = cx + Math.cos(rot) * size;
       let y = cy + Math.sin(rot) * size;
       ctx.lineTo(x, y);
-      rot += step;
+      rot += stepAngle;
       
       x = cx + Math.cos(rot) * size * 0.4;
       y = cy + Math.sin(rot) * size * 0.4;
       ctx.lineTo(x, y);
-      rot += step;
+      rot += stepAngle;
     }
     
     ctx.lineTo(cx, cy - size);
@@ -468,7 +468,7 @@ export class ShadiaoCharacter {
     
     // 根据状态调整四肢
     switch (mode) {
-      case 'climbing':
+      case 'climbing': {
         // 爬楼梯时手脚乱动
         const progress = this.animationProgress;
         leftArmAngle = -Math.PI/3 - Math.sin(progress * Math.PI) * Math.PI/4;
@@ -476,7 +476,8 @@ export class ShadiaoCharacter {
         leftLegAngle = -Math.PI/6 - Math.cos(progress * Math.PI) * Math.PI/6;
         rightLegAngle = Math.PI/6 + Math.cos(progress * Math.PI) * Math.PI/6;
         break;
-      case 'celebrating':
+      }
+      case 'celebrating': {
         // 庆祝时手臂挥舞
         const time = Date.now() / 150;
         leftArmAngle = -Math.PI/2 + Math.sin(time) * Math.PI/4;
@@ -484,6 +485,7 @@ export class ShadiaoCharacter {
         leftLegAngle = -Math.PI/12 + Math.sin(time) * Math.PI/8;
         rightLegAngle = Math.PI/12 - Math.sin(time) * Math.PI/8;
         break;
+      }
       case 'thinking':
         // 思考时一只手摸下巴
         leftArmAngle = -Math.PI/2;

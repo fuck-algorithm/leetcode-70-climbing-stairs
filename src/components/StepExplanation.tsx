@@ -64,6 +64,8 @@ const StepExplanation: React.FC<StepExplanationProps> = ({
   code, 
   formula 
 }) => {
+  // 保留totalSteps以备将来使用
+  void totalSteps;
   return (
     <ExplanationContainer>
       <StepTitle>

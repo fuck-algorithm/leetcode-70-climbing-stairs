@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { setAnimationState } from '../../state/animationSlice';
+import { setAnimationState, AnimationState, AnimationTimeline } from '../../state/animationSlice';
 import { generateDPSolution } from '../../algorithms/dpAlgorithm';
 import AnimatedClimber from './AnimatedClimber';
 import styled from 'styled-components';
@@ -15,11 +15,20 @@ import {
   ExplanationPanel
 } from './styles/layout';
 
+interface DPSolutionData {
+  result: number;
+  timeline: AnimationTimeline[];
+  stepsData?: {
+    stepStatuses: ('uncalculated' | 'calculating' | 'calculated')[];
+    values: number[];
+  };
+}
+
 interface SimpleDPVisualizerProps {
   n: number;
-  state: any;
-  onGenerateSolution: (data: any) => void;
-  dispatch: (action: any) => void;
+  state: AnimationState;
+  onGenerateSolution: (data: DPSolutionData) => void;
+  dispatch: React.Dispatch<ReturnType<typeof setAnimationState> | { type: string; payload?: unknown }>;
 }
 
 const SimpleDPVisualizer: React.FC<SimpleDPVisualizerProps> = ({

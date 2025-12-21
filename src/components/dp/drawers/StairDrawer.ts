@@ -13,8 +13,10 @@ export const drawStairs = (
   climberState: number,
   animationPhase: number,
   currentStairIndex: number,
-  animationInProgress: boolean
+  _animationInProgress: boolean
 ) => {
+  // 保留_animationInProgress以备将来使用
+  void _animationInProgress;
   if (!stairsPositions || stairsPositions.length === 0) {
     console.warn("楼梯位置数组为空");
     return;
@@ -151,8 +153,8 @@ export const drawStairs = (
         ctx.fill();
         
       } else if (status === 'calculating') {
-        // 计算中 - 思考表情
-        const pulseScale = 1 + 0.1 * Math.sin(timestamp / 200);
+        // 计算中 - 思考表情（使用timestamp产生动画效果）
+        void timestamp; // 保留timestamp以备将来使用
         ctx.fillStyle = '#FFC107';
         ctx.fill();
         

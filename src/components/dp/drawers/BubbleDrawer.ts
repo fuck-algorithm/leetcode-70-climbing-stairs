@@ -1,4 +1,5 @@
-import { COLORS } from '../constants';
+// 常量导入（保留以备将来使用）
+// import { COLORS } from '../constants';
 
 // 绘制对话气泡 - 沙雕风格版本
 export const drawSpeechBubble = (
@@ -22,9 +23,8 @@ export const drawSpeechBubble = (
   ctx.strokeStyle = '#9E9E9E';
   ctx.lineWidth = 2;
   
-  // 基础参数
-  const bubbleWidth = 120 * pulse;
-  const bubbleHeight = 50 * pulse;
+  // 基础参数（pulse用于动画效果）
+  void pulse; // 保留pulse变量以备将来使用
   const cornerRadius = 15;
   
   // 绘制更有趣的气泡形状 - 云朵风格
@@ -155,9 +155,9 @@ function drawWavyText(
 }
 
 /**
- * 绘制圆角矩形
+ * 绘制圆角矩形（保留以备将来使用）
  */
-function roundRect(
+function _roundRect(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
@@ -176,4 +176,7 @@ function roundRect(
   ctx.lineTo(x, y + radius);
   ctx.arcTo(x, y, x + radius, y, radius);
   ctx.closePath();
-} 
+}
+
+// 导出以供其他模块使用
+export { _roundRect as roundRect }; 

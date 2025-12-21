@@ -82,7 +82,7 @@ const CanvasComponent: React.FC<CanvasComponentProps> = ({ state, width, height 
     
     // 添加步骤描述背景和文本 - 新增内容
     const stepDesc = state.timeline[state.currentStep]?.description || "";
-    const stepBackground = stepDescGroup.append('rect')
+    stepDescGroup.append('rect')
       .attr('x', 0)
       .attr('y', 10)
       .attr('width', dimensions.width)
@@ -238,7 +238,7 @@ const CanvasComponent: React.FC<CanvasComponentProps> = ({ state, width, height 
     
     // 渲染公式 - 增强显示
     if (state.formula) {
-      const formulaBackground = formulaGroup.append('rect')
+      formulaGroup.append('rect')
         .attr('x', innerWidth - 220)
         .attr('y', -20)
         .attr('width', 200)
@@ -274,7 +274,7 @@ const CanvasComponent: React.FC<CanvasComponentProps> = ({ state, width, height 
     
     // 渲染矩阵（仅当使用矩阵算法时）
     if (state.currentAlgorithm === 'matrix' && state.matrix.length > 0) {
-      renderMatrix(g, state.matrix, innerWidth, innerHeight);
+      renderMatrix(g, state.matrix, innerWidth);
     }
     
   }, [state.staircase, state.currentAlgorithm, state.formula, state.matrix, dimensions, state.currentStep, state.timeline, state.totalSteps]);
@@ -317,8 +317,7 @@ const CanvasComponent: React.FC<CanvasComponentProps> = ({ state, width, height 
   const renderMatrix = (
     g: d3.Selection<SVGGElement, unknown, null, undefined>, 
     matrix: number[][], 
-    width: number, 
-    height: number
+    width: number
   ) => {
     const matrixGroup = g.append('g')
       .attr('class', 'matrix')

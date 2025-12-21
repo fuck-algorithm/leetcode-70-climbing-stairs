@@ -3,7 +3,8 @@ import {
   playPause, 
   resetAnimation, 
   setCurrentStep, 
-  setPlaybackSpeed 
+  setPlaybackSpeed,
+  AnimationState
 } from '../../../state/animationSlice';
 
 /**
@@ -11,8 +12,8 @@ import {
  * 从SimpleDPVisualizer组件中提取事件处理逻辑
  */
 export const useControlHandlers = (
-  state: any,
-  dispatch: (action: any) => void
+  state: AnimationState,
+  dispatch: (action: { type: string; payload?: unknown }) => void
 ) => {
   // 播放/暂停按钮处理函数
   const handlePlayPause = useCallback((e?: React.MouseEvent) => {
@@ -33,7 +34,7 @@ export const useControlHandlers = (
     dispatch({ 
       type: 'animation/updateStepData', 
       payload: {
-        stepStatuses: state.stepStatuses?.map((s: string, i: number) => 
+        stepStatuses: state.stepStatuses?.map((_s: string, i: number) => 
           i <= 1 ? 'calculated' : 'uncalculated'),
         values: state.values
       }

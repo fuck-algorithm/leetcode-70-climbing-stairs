@@ -12,7 +12,7 @@ import { generateFormulaSolution } from '../algorithms/formulaAlgorithm';
  */
 export function useAnimation(
   state: AnimationState,
-  dispatch: (action: any) => void,
+  dispatch: (action: { type: string; payload?: unknown }) => void,
   n: number = 5
 ) {
   const animationFrameRef = useRef<number | null>(null);

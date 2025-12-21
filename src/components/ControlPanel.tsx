@@ -10,7 +10,7 @@ import {
 
 interface ControlPanelProps {
   state: AnimationState;
-  dispatch: (action: any) => void; // Redux dispatch 函数
+  dispatch: React.Dispatch<ReturnType<typeof playPause | typeof resetAnimation | typeof setAlgorithm | typeof setCurrentStep | typeof setPlaybackSpeed>>;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({ state, dispatch }) => {

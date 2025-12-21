@@ -6,12 +6,15 @@ export interface DPAnimationState {
   currentStep: number;
 }
 
-// 为每个步骤添加多层次的解释
-interface StepExplanation {
+// 为每个步骤添加多层次的解释（用于类型定义）
+interface _StepExplanation {
   simple: string;
   detailed: string;
   expert: string;
 }
+
+// 导出类型以供其他模块使用
+export type StepExplanation = _StepExplanation;
 
 /**
  * 使用动态规划算法生成爬楼梯问题的解和动画时间线

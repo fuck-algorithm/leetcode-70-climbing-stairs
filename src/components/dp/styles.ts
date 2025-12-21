@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { ClimberPosition } from './types';
+// ClimberPosition类型保留以备将来使用
+// import { ClimberPosition } from './types';
 
 // 容器样式
 export const VisualizerContainer = styled.div`

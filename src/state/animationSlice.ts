@@ -60,18 +60,33 @@ const initialState: AnimationState = {
   animationInProgress: false
 };
 
-// 动作类型常量 - 不再导出为单独的action creators
-const PLAY_PAUSE = 'animation/playPause';
-const RESET_ANIMATION = 'animation/resetAnimation';
-const UPDATE_STAIRCASE = 'animation/updateStaircase';
-const UPDATE_MATRIX = 'animation/updateMatrix';
-const UPDATE_FORMULA = 'animation/updateFormula';
-const SET_ALGORITHM = 'animation/setAlgorithm';
-const SET_CURRENT_STEP = 'animation/setCurrentStep';
-const SET_PLAYBACK_SPEED = 'animation/setPlaybackSpeed';
+// 动作类型常量 - 用于内部引用
+const _PLAY_PAUSE = 'animation/playPause';
+const _RESET_ANIMATION = 'animation/resetAnimation';
+const _UPDATE_STAIRCASE = 'animation/updateStaircase';
+const _UPDATE_MATRIX = 'animation/updateMatrix';
+const _UPDATE_FORMULA = 'animation/updateFormula';
+const _SET_ALGORITHM = 'animation/setAlgorithm';
+const _SET_CURRENT_STEP = 'animation/setCurrentStep';
+const _SET_PLAYBACK_SPEED = 'animation/setPlaybackSpeed';
 export const INITIALIZE = 'animation/initialize';
-const UPDATE_STEP_DATA = 'animation/updateStepData';
-const SET_ANIMATION_STATE = 'animation/setAnimationState';
+const _UPDATE_STEP_DATA = 'animation/updateStepData';
+const _SET_ANIMATION_STATE = 'animation/setAnimationState';
+
+// 导出动作类型常量供外部使用
+export const ACTION_TYPES = {
+  PLAY_PAUSE: _PLAY_PAUSE,
+  RESET_ANIMATION: _RESET_ANIMATION,
+  UPDATE_STAIRCASE: _UPDATE_STAIRCASE,
+  UPDATE_MATRIX: _UPDATE_MATRIX,
+  UPDATE_FORMULA: _UPDATE_FORMULA,
+  SET_ALGORITHM: _SET_ALGORITHM,
+  SET_CURRENT_STEP: _SET_CURRENT_STEP,
+  SET_PLAYBACK_SPEED: _SET_PLAYBACK_SPEED,
+  INITIALIZE,
+  UPDATE_STEP_DATA: _UPDATE_STEP_DATA,
+  SET_ANIMATION_STATE: _SET_ANIMATION_STATE
+};
 
 // 创建 slice
 const animationSlice = createSlice({

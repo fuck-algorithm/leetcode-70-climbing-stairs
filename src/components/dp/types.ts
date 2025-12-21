@@ -1,15 +1,24 @@
 import { AnimationState, AnimationTimeline } from '../../state/animationSlice';
 
+export interface DPSolutionData {
+  result: number;
+  timeline: AnimationTimeline[];
+  stepsData?: {
+    stepStatuses: ('uncalculated' | 'calculating' | 'calculated')[];
+    values: number[];
+  };
+}
+
 export interface DynamicProgrammingVisualizerProps {
   n: number;
   state: AnimationState;
-  onGenerateSolution: (data: any) => void;
-  dispatch: (action: any) => void;
+  onGenerateSolution: (data: DPSolutionData) => void;
+  dispatch: (action: { type: string; payload?: unknown }) => void;
 }
 
 export interface ControlPanelProps {
   state: AnimationState;
-  dispatch: (action: any) => void;
+  dispatch: (action: { type: string; payload?: unknown }) => void;
   onReset: (e?: React.MouseEvent<HTMLButtonElement>) => void;
   onPlayPause: (e?: React.MouseEvent<HTMLButtonElement>) => void;
   onPreviousStep: (e?: React.MouseEvent<HTMLButtonElement>) => void;

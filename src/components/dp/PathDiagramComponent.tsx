@@ -16,14 +16,14 @@ import {
 import { useClimberPosition } from './hooks/useClimberPosition';
 
 const PathDiagramComponent: React.FC<PathDiagramProps> = ({ n, state, currentTimeline }) => {
-  if (!state.values || state.values.length === 0) return null;
-  
-  // 使用钩子获取小人位置和状态
+  // 使用钩子获取小人位置和状态 - 必须在条件返回之前调用
   const { climberPosition, climberEmoji, actionText, currentCalcIndex } = useClimberPosition(state, currentTimeline);
-  console.log('PathDiagram渲染, 当前计算阶梯:', currentCalcIndex);
   
   // 创建要显示的楼梯步骤
   const stepsToShow = useMemo(() => {
+    // 如果没有值数据，返回空数组
+    if (!state.values || state.values.length === 0) return [];
+    
     const steps = [];
     const maxStepsToShow = Math.min(n, 6); // 限制显示的最大阶梯数
     
@@ -99,6 +99,9 @@ const PathDiagramComponent: React.FC<PathDiagramProps> = ({ n, state, currentTim
     
     return steps;
   }, [n, state.values, state.stepStatuses, currentCalcIndex, climberPosition, actionText]);
+  
+  // 如果没有值数据，返回null
+  if (!state.values || state.values.length === 0) return null;
   
   return (
     <PathDiagram>
