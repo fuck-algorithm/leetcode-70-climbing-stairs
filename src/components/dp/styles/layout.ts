@@ -55,7 +55,9 @@ export const ProgressBar = styled.div`
   margin-bottom: 10px;
 `;
 
-export const Progress = styled.div<{ percent: number }>`
+export const Progress = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'percent',
+})<{ percent: number }>`
   height: 100%;
   background-color: #4CAF50;
   width: ${props => `${props.percent}%`};

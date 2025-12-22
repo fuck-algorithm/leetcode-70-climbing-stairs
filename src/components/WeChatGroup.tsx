@@ -39,7 +39,9 @@ const GroupIcon = styled.div`
   }
 `;
 
-const Popup = styled.div<{ isVisible: boolean }>`
+const Popup = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'isVisible',
+})<{ isVisible: boolean }>`
   position: fixed;
   bottom: 90px;
   right: 20px;

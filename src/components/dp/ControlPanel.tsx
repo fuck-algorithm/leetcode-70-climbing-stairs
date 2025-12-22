@@ -42,7 +42,9 @@ const ButtonsRow = styled.div`
   flex-wrap: wrap;
 `;
 
-const ControlButton = styled.button<{ primary?: boolean }>`
+const ControlButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'primary',
+})<{ primary?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;

@@ -63,7 +63,9 @@ const PresetLabel = styled.span`
   color: #666;
 `;
 
-const PresetButton = styled.button<{ isActive: boolean }>`
+const PresetButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'isActive',
+})<{ isActive: boolean }>`
   padding: 4px 12px;
   border: 1px solid ${props => props.isActive ? '#4CAF50' : '#ddd'};
   background: ${props => props.isActive ? '#e8f5e9' : 'white'};

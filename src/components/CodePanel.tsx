@@ -10,20 +10,46 @@ type Language = 'java' | 'python' | 'golang' | 'javascript';
 
 const LANGUAGE_STORAGE_KEY = 'preferred_code_language';
 
+// IndexedDB操作
+const openDB = (): Promise<IDBDatabase> => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('CodeLanguageDB', 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains('preferences')) {
+        db.createObjectStore('preferences', { keyPath: 'key' });
+      }
+    };
+  });
+};
+
 // 从IndexedDB获取语言偏好
 const getStoredLanguage = async (): Promise<Language | null> => {
   try {
-    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    return stored as Language | null;
+    const db = await openDB();
+    return new Promise((resolve) => {
+      const transaction = db.transaction(['preferences'], 'readonly');
+      const store = transaction.objectStore('preferences');
+      const request = store.get(LANGUAGE_STORAGE_KEY);
+      request.onsuccess = () => {
+        resolve(request.result?.value as Language | null);
+      };
+      request.onerror = () => resolve(null);
+    });
   } catch {
     return null;
   }
 };
 
 // 保存语言偏好到IndexedDB
-const storeLanguage = (lang: Language): void => {
+const storeLanguage = async (lang: Language): Promise<void> => {
   try {
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+    const db = await openDB();
+    const transaction = db.transaction(['preferences'], 'readwrite');
+    const store = transaction.objectStore('preferences');
+    store.put({ key: LANGUAGE_STORAGE_KEY, value: lang });
   } catch {
     // 忽略存储错误
   }
@@ -267,7 +293,7 @@ const LANGUAGE_LABELS: Record<Language, string> = {
   javascript: 'JavaScript',
 };
 
-// 样式组件
+// 样式组件 - 使用shouldForwardProp避免警告
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -284,7 +310,9 @@ const TabBar = styled.div`
   border-bottom: 1px solid #404040;
 `;
 
-const Tab = styled.button<{ isActive: boolean }>`
+const Tab = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'isActive',
+})<{ isActive: boolean }>`
   padding: 6px 12px;
   border: none;
   background: ${props => props.isActive ? '#1e1e1e' : 'transparent'};
@@ -327,7 +355,9 @@ const LineNumber = styled.span`
   user-select: none;
 `;
 
-const CodeLine = styled.div<{ isHighlighted?: boolean }>`
+const CodeLineWrapper = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'isHighlighted',
+})<{ isHighlighted?: boolean }>`
   display: flex;
   background: ${props => props.isHighlighted ? 'rgba(255, 235, 59, 0.1)' : 'transparent'};
   border-left: ${props => props.isHighlighted ? '3px solid #FFEB3B' : '3px solid transparent'};
@@ -341,42 +371,76 @@ const CodeContent = styled.span`
   flex: 1;
 `;
 
+// 语法高亮颜色
+const COLORS = {
+  keyword: '#569cd6',
+  string: '#ce9178',
+  number: '#b5cea8',
+  comment: '#6a9955',
+  function: '#dcdcaa',
+  type: '#4ec9b0',
+};
+
+// 转义HTML特殊字符
+const escapeHtml = (text: string): string => {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 // 简单的语法高亮
 const highlightCode = (code: string, language: Language): React.ReactNode[] => {
   const lines = code.split('\n');
   
+  // 关键字定义
+  const keywords: Record<Language, string[]> = {
+    java: ['class', 'public', 'private', 'protected', 'static', 'final', 'int', 'double', 'void', 'return', 'if', 'else', 'for', 'while', 'new', 'this', 'true', 'false', 'null'],
+    python: ['class', 'def', 'return', 'if', 'else', 'elif', 'for', 'while', 'import', 'from', 'in', 'range', 'int', 'True', 'False', 'None', 'self', 'and', 'or', 'not'],
+    golang: ['func', 'return', 'if', 'else', 'for', 'var', 'int', 'float64', 'make', 'range', 'import', 'package', 'true', 'false', 'nil'],
+    javascript: ['var', 'const', 'let', 'function', 'return', 'if', 'else', 'for', 'while', 'new', 'this', 'true', 'false', 'null', 'undefined'],
+  };
+  
   return lines.map((line, index) => {
-    let highlighted = line;
+    // 先转义HTML
+    const escaped = escapeHtml(line);
+    let highlighted = escaped;
     
-    // 关键字高亮
-    const keywords: Record<Language, string[]> = {
-      java: ['class', 'public', 'private', 'int', 'return', 'if', 'for', 'while', 'new', 'void'],
-      python: ['class', 'def', 'return', 'if', 'for', 'while', 'import', 'from', 'in', 'range', 'int'],
-      golang: ['func', 'return', 'if', 'for', 'var', 'int', 'make', 'range', 'import', 'package'],
-      javascript: ['var', 'const', 'let', 'function', 'return', 'if', 'for', 'while', 'new'],
-    };
+    // 处理注释 (先处理，避免被其他规则干扰)
+    if (language === 'python') {
+      highlighted = highlighted.replace(/(#.*)$/g, `<span style="color: ${COLORS.comment};">$1</span>`);
+    } else {
+      highlighted = highlighted.replace(/(\/\/.*)$/g, `<span style="color: ${COLORS.comment};">$1</span>`);
+    }
     
-    // 简单的高亮处理
+    // 处理字符串 (简单处理双引号和单引号字符串)
+    highlighted = highlighted.replace(/(&quot;[^&]*&quot;|&#039;[^&]*&#039;)/g, `<span style="color: ${COLORS.string};">$1</span>`);
+    
+    // 处理数字
+    highlighted = highlighted.replace(/\b(\d+\.?\d*)\b/g, `<span style="color: ${COLORS.number};">$1</span>`);
+    
+    // 处理关键字
     keywords[language].forEach(keyword => {
       const regex = new RegExp(`\\b(${keyword})\\b`, 'g');
-      highlighted = highlighted.replace(regex, `<span style="color: #569cd6;">$1</span>`);
+      highlighted = highlighted.replace(regex, `<span style="color: ${COLORS.keyword};">$1</span>`);
     });
     
-    // 字符串高亮
-    highlighted = highlighted.replace(/(["'])(.*?)\1/g, '<span style="color: #ce9178;">$&</span>');
-    
-    // 数字高亮
-    highlighted = highlighted.replace(/\b(\d+)\b/g, '<span style="color: #b5cea8;">$1</span>');
-    
-    // 注释高亮
-    highlighted = highlighted.replace(/(\/\/.*$)/g, '<span style="color: #6a9955;">$1</span>');
-    highlighted = highlighted.replace(/(#.*$)/g, '<span style="color: #6a9955;">$1</span>');
+    // 处理函数名 (简单匹配)
+    if (language === 'java' || language === 'javascript') {
+      highlighted = highlighted.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g, `<span style="color: ${COLORS.function};">$1</span>(`);
+    } else if (language === 'python') {
+      highlighted = highlighted.replace(/\b(def)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, `<span style="color: ${COLORS.keyword};">$1</span> <span style="color: ${COLORS.function};">$2</span>`);
+    } else if (language === 'golang') {
+      highlighted = highlighted.replace(/\b(func)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, `<span style="color: ${COLORS.keyword};">$1</span> <span style="color: ${COLORS.function};">$2</span>`);
+    }
     
     return (
-      <CodeLine key={index}>
+      <CodeLineWrapper key={index}>
         <LineNumber>{index + 1}</LineNumber>
         <CodeContent dangerouslySetInnerHTML={{ __html: highlighted || '&nbsp;' }} />
-      </CodeLine>
+      </CodeLineWrapper>
     );
   });
 };

@@ -35,7 +35,9 @@ const ThoughtsButton = styled.button`
   }
 `;
 
-const Modal = styled.div<{ isOpen: boolean }>`
+const Modal = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'isOpen',
+})<{ isOpen: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
