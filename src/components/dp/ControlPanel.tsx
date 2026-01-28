@@ -1,28 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ControlPanelProps } from './types';
 import styled from 'styled-components';
-
-// 播放速度存储键
-const SPEED_STORAGE_KEY = 'playback_speed';
-
-// 从localStorage获取播放速度
-const getStoredSpeed = (): number => {
-  try {
-    const stored = localStorage.getItem(SPEED_STORAGE_KEY);
-    return stored ? parseFloat(stored) : 1.0;
-  } catch {
-    return 1.0;
-  }
-};
-
-// 保存播放速度到localStorage
-const storeSpeed = (speed: number): void => {
-  try {
-    localStorage.setItem(SPEED_STORAGE_KEY, speed.toString());
-  } catch {
-    // 忽略存储错误
-  }
-};
+import { playbackSpeedService } from '../../services/indexedDBService';
 
 // 样式组件
 const ControlsContainer = styled.div`
@@ -163,7 +142,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onStepChange,
   onSpeedChange
 }) => {
-  const [localSpeed, setLocalSpeed] = useState(getStoredSpeed());
+  const [localSpeed, setLocalSpeed] = useState(1.0);
   
   // 为了防止totalSteps出错导致进度条无效，添加安全检查
   const totalSteps = state?.totalSteps > 0 ? state.totalSteps : (state?.timeline?.length || 1);
@@ -195,18 +174,21 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     else onReset();
   }, [onReset]);
   
-  // 处理速度变化
+  // 处理速度变化 - 使用 IndexedDB 持久化
   const handleSpeedChangeLocal = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const speed = parseFloat(e.target.value);
     setLocalSpeed(speed);
-    storeSpeed(speed);
+    playbackSpeedService.set(speed);
     onSpeedChange(e);
   }, [onSpeedChange]);
 
-  // 初始化时设置保存的速度
+  // 初始化时从 IndexedDB 加载保存的速度
   useEffect(() => {
-    const storedSpeed = getStoredSpeed();
-    setLocalSpeed(storedSpeed);
+    playbackSpeedService.get().then(storedSpeed => {
+      if (storedSpeed !== null) {
+        setLocalSpeed(storedSpeed);
+      }
+    });
   }, []);
 
   // 键盘快捷键

@@ -188,9 +188,14 @@ const animationSlice = createSlice({
       state.formula = action.payload;
     },
     
-    // 添加设置算法的reducer
+    // 添加设置算法的reducer - 切换算法时重置状态
     setAlgorithm(state: AnimationState, action: PayloadAction<AnimationState['currentAlgorithm']>) {
       state.currentAlgorithm = action.payload;
+      // 切换算法时重置动画状态
+      state.isPlaying = false;
+      state.currentStep = 0;
+      state.animationInProgress = false;
+      console.log("算法切换为:", action.payload, "状态已重置");
     },
     
     // 添加更新步骤数据的reducer

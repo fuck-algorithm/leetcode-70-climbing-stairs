@@ -42,27 +42,30 @@ body, html {
 
 .app-header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  padding: 8px 10px;
+  padding: 10px 20px;
   border-bottom: 1px solid var(--border-color);
-  height: 50px;
-  background-color: #f8f9fa;
+  height: 60px;
+  background-color: #fff;
   border-radius: 4px;
   margin-bottom: 5px;
   position: relative;
   z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .app-header h1 {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   margin: 0;
   color: var(--primary-color);
+  white-space: nowrap;
 }
 
 .title-link {
   text-decoration: none;
   transition: opacity 0.2s ease;
+  flex-shrink: 0;
 }
 
 .title-link:hover {
@@ -71,6 +74,14 @@ body, html {
 
 .title-link h1 {
   color: var(--primary-color);
+}
+
+/* 算法导航栏 */
+.algorithm-nav {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  padding-right: 100px;
 }
 
 .input-row {
@@ -87,27 +98,46 @@ body, html {
 
 .algorithm-selector {
   display: flex;
-  gap: 8px;
+  gap: 12px;
 }
 
 .algorithm-button {
-  padding: 6px 16px;
+  padding: 8px 20px;
   border: 2px solid;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   background: transparent;
+  position: relative;
+  overflow: hidden;
 }
 
 .algorithm-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .algorithm-button.active {
   transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.algorithm-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: currentColor;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.algorithm-button.active::after {
+  width: 60%;
 }
 
 .stairs-config {
@@ -265,6 +295,24 @@ button:focus, input:focus {
 
 /* 响应式设计 */
 @media (max-width: 1024px) {
+  .app-header {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 10px 15px;
+    gap: 10px;
+  }
+  
+  .algorithm-nav {
+    padding-right: 0;
+    width: 100%;
+    justify-content: center;
+    order: 2;
+  }
+  
+  .title-link {
+    order: 1;
+  }
+  
   .app-content {
     flex-direction: column;
   }
@@ -294,6 +342,19 @@ button:focus, input:focus {
 }
 
 @media (max-width: 768px) {
+  .app-header {
+    padding: 8px 10px;
+  }
+  
+  .algorithm-button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .algorithm-nav {
+    padding-right: 0;
+  }
+  
   .app-content {
     flex-direction: column;
   }
@@ -317,5 +378,6 @@ button:focus, input:focus {
   .algorithm-selector {
     flex-wrap: wrap;
     justify-content: center;
+    gap: 8px;
   }
 }

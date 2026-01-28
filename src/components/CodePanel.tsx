@@ -1,62 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { AnimationState } from '../state/animationSlice';
+import { languageService, type Language } from '../services/indexedDBService';
+import { getCodeLineMapping } from '../utils/codeLineMapping';
 
 interface CodePanelProps {
   state: AnimationState;
+  n?: number;
 }
 
-type Language = 'java' | 'python' | 'golang' | 'javascript';
-
-const LANGUAGE_STORAGE_KEY = 'preferred_code_language';
-
-// IndexedDB操作
-const openDB = (): Promise<IDBDatabase> => {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('CodeLanguageDB', 1);
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
-    request.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains('preferences')) {
-        db.createObjectStore('preferences', { keyPath: 'key' });
-      }
-    };
-  });
-};
-
-// 从IndexedDB获取语言偏好
-const getStoredLanguage = async (): Promise<Language | null> => {
-  try {
-    const db = await openDB();
-    return new Promise((resolve) => {
-      const transaction = db.transaction(['preferences'], 'readonly');
-      const store = transaction.objectStore('preferences');
-      const request = store.get(LANGUAGE_STORAGE_KEY);
-      request.onsuccess = () => {
-        resolve(request.result?.value as Language | null);
-      };
-      request.onerror = () => resolve(null);
-    });
-  } catch {
-    return null;
-  }
-};
-
-// 保存语言偏好到IndexedDB
-const storeLanguage = async (lang: Language): Promise<void> => {
-  try {
-    const db = await openDB();
-    const transaction = db.transaction(['preferences'], 'readwrite');
-    const store = transaction.objectStore('preferences');
-    store.put({ key: LANGUAGE_STORAGE_KEY, value: lang });
-  } catch {
-    // 忽略存储错误
-  }
-};
-
 // 代码数据
-const CODE_DATA: Record<string, Record<Language, { code: string; highlightLines?: number[] }>> = {
+const CODE_DATA: Record<string, Record<Language, { code: string }>> = {
   dp: {
     java: {
       code: `class Solution {
@@ -293,7 +247,7 @@ const LANGUAGE_LABELS: Record<Language, string> = {
   javascript: 'JavaScript',
 };
 
-// 样式组件 - 使用shouldForwardProp避免警告
+// 样式组件
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -356,11 +310,20 @@ const LineNumber = styled.span`
 `;
 
 const CodeLineWrapper = styled.div.withConfig({
-  shouldForwardProp: (prop) => prop !== 'isHighlighted',
-})<{ isHighlighted?: boolean }>`
+  shouldForwardProp: (prop) => !['isHighlighted', 'isExecuting'].includes(prop),
+})<{ isHighlighted?: boolean; isExecuting?: boolean }>`
   display: flex;
-  background: ${props => props.isHighlighted ? 'rgba(255, 235, 59, 0.1)' : 'transparent'};
-  border-left: ${props => props.isHighlighted ? '3px solid #FFEB3B' : '3px solid transparent'};
+  align-items: center;
+  background: ${props => {
+    if (props.isExecuting) return 'rgba(76, 175, 80, 0.2)';
+    if (props.isHighlighted) return 'rgba(255, 235, 59, 0.1)';
+    return 'transparent';
+  }};
+  border-left: ${props => {
+    if (props.isExecuting) return '3px solid #4CAF50';
+    if (props.isHighlighted) return '3px solid #FFEB3B';
+    return '3px solid transparent';
+  }};
   
   &:hover {
     background: rgba(255, 255, 255, 0.05);
@@ -369,6 +332,16 @@ const CodeLineWrapper = styled.div.withConfig({
 
 const CodeContent = styled.span`
   flex: 1;
+`;
+
+const VariableValue = styled.span`
+  color: #9CDCFE;
+  font-size: 11px;
+  margin-left: 16px;
+  padding: 2px 6px;
+  background: rgba(156, 220, 254, 0.1);
+  border-radius: 3px;
+  white-space: nowrap;
 `;
 
 // 语法高亮颜色
@@ -391,11 +364,11 @@ const escapeHtml = (text: string): string => {
     .replace(/'/g, '&#039;');
 };
 
-// 简单的语法高亮
-const highlightCode = (code: string, language: Language): React.ReactNode[] => {
-  const lines = code.split('\n');
+// 语法高亮处理
+const applyHighlight = (line: string, language: Language): string => {
+  const escaped = escapeHtml(line);
+  let highlighted = escaped;
   
-  // 关键字定义
   const keywords: Record<Language, string[]> = {
     java: ['class', 'public', 'private', 'protected', 'static', 'final', 'int', 'double', 'void', 'return', 'if', 'else', 'for', 'while', 'new', 'this', 'true', 'false', 'null'],
     python: ['class', 'def', 'return', 'if', 'else', 'elif', 'for', 'while', 'import', 'from', 'in', 'range', 'int', 'True', 'False', 'None', 'self', 'and', 'or', 'not'],
@@ -403,54 +376,43 @@ const highlightCode = (code: string, language: Language): React.ReactNode[] => {
     javascript: ['var', 'const', 'let', 'function', 'return', 'if', 'else', 'for', 'while', 'new', 'this', 'true', 'false', 'null', 'undefined'],
   };
   
-  return lines.map((line, index) => {
-    // 先转义HTML
-    const escaped = escapeHtml(line);
-    let highlighted = escaped;
-    
-    // 处理注释 (先处理，避免被其他规则干扰)
-    if (language === 'python') {
-      highlighted = highlighted.replace(/(#.*)$/g, `<span style="color: ${COLORS.comment};">$1</span>`);
-    } else {
-      highlighted = highlighted.replace(/(\/\/.*)$/g, `<span style="color: ${COLORS.comment};">$1</span>`);
-    }
-    
-    // 处理字符串 (简单处理双引号和单引号字符串)
-    highlighted = highlighted.replace(/(&quot;[^&]*&quot;|&#039;[^&]*&#039;)/g, `<span style="color: ${COLORS.string};">$1</span>`);
-    
-    // 处理数字
-    highlighted = highlighted.replace(/\b(\d+\.?\d*)\b/g, `<span style="color: ${COLORS.number};">$1</span>`);
-    
-    // 处理关键字
-    keywords[language].forEach(keyword => {
-      const regex = new RegExp(`\\b(${keyword})\\b`, 'g');
-      highlighted = highlighted.replace(regex, `<span style="color: ${COLORS.keyword};">$1</span>`);
-    });
-    
-    // 处理函数名 (简单匹配)
-    if (language === 'java' || language === 'javascript') {
-      highlighted = highlighted.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g, `<span style="color: ${COLORS.function};">$1</span>(`);
-    } else if (language === 'python') {
-      highlighted = highlighted.replace(/\b(def)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, `<span style="color: ${COLORS.keyword};">$1</span> <span style="color: ${COLORS.function};">$2</span>`);
-    } else if (language === 'golang') {
-      highlighted = highlighted.replace(/\b(func)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, `<span style="color: ${COLORS.keyword};">$1</span> <span style="color: ${COLORS.function};">$2</span>`);
-    }
-    
-    return (
-      <CodeLineWrapper key={index}>
-        <LineNumber>{index + 1}</LineNumber>
-        <CodeContent dangerouslySetInnerHTML={{ __html: highlighted || '&nbsp;' }} />
-      </CodeLineWrapper>
-    );
+  // 处理注释
+  if (language === 'python') {
+    highlighted = highlighted.replace(/(#.*)$/g, `<span style="color: ${COLORS.comment};">$1</span>`);
+  } else {
+    highlighted = highlighted.replace(/(\/\/.*)$/g, `<span style="color: ${COLORS.comment};">$1</span>`);
+  }
+  
+  // 处理字符串
+  highlighted = highlighted.replace(/(&quot;[^&]*&quot;|&#039;[^&]*&#039;)/g, `<span style="color: ${COLORS.string};">$1</span>`);
+  
+  // 处理数字
+  highlighted = highlighted.replace(/\b(\d+\.?\d*)\b/g, `<span style="color: ${COLORS.number};">$1</span>`);
+  
+  // 处理关键字
+  keywords[language].forEach(keyword => {
+    const regex = new RegExp(`\\b(${keyword})\\b`, 'g');
+    highlighted = highlighted.replace(regex, `<span style="color: ${COLORS.keyword};">$1</span>`);
   });
+  
+  // 处理函数名
+  if (language === 'java' || language === 'javascript') {
+    highlighted = highlighted.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g, `<span style="color: ${COLORS.function};">$1</span>(`);
+  } else if (language === 'python') {
+    highlighted = highlighted.replace(/\b(def)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, `<span style="color: ${COLORS.keyword};">$1</span> <span style="color: ${COLORS.function};">$2</span>`);
+  } else if (language === 'golang') {
+    highlighted = highlighted.replace(/\b(func)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, `<span style="color: ${COLORS.keyword};">$1</span> <span style="color: ${COLORS.function};">$2</span>`);
+  }
+  
+  return highlighted;
 };
 
-const CodePanel: React.FC<CodePanelProps> = ({ state }) => {
+const CodePanel: React.FC<CodePanelProps> = ({ state, n = 6 }) => {
   const [language, setLanguage] = useState<Language>('java');
   
   // 加载保存的语言偏好
   useEffect(() => {
-    getStoredLanguage().then(stored => {
+    languageService.get().then(stored => {
       if (stored) {
         setLanguage(stored);
       }
@@ -460,15 +422,33 @@ const CodePanel: React.FC<CodePanelProps> = ({ state }) => {
   // 切换语言
   const handleLanguageChange = (lang: Language) => {
     setLanguage(lang);
-    storeLanguage(lang);
+    languageService.set(lang);
   };
   
   const algorithmKey = state.currentAlgorithm;
   const codeData = CODE_DATA[algorithmKey]?.[language];
   
+  // 获取当前步骤的代码行映射
+  const codeLineMapping = getCodeLineMapping(algorithmKey, state.currentStep, n);
+  const highlightedLines = codeLineMapping.lineNumbers[language] || [];
+  
+  // 获取变量值映射
+  const variablesByLine: Record<number, { name: string; value: string | number }[]> = {};
+  if (codeLineMapping.variables) {
+    codeLineMapping.variables.forEach(v => {
+      const lineNum = v.line[language];
+      if (!variablesByLine[lineNum]) {
+        variablesByLine[lineNum] = [];
+      }
+      variablesByLine[lineNum].push({ name: v.name, value: v.value });
+    });
+  }
+  
   if (!codeData) {
     return <Container>暂无代码</Container>;
   }
+  
+  const lines = codeData.code.split('\n');
   
   return (
     <Container>
@@ -485,7 +465,28 @@ const CodePanel: React.FC<CodePanelProps> = ({ state }) => {
       </TabBar>
       <CodeContainer>
         <Pre>
-          {highlightCode(codeData.code, language)}
+          {lines.map((line, index) => {
+            const lineNum = index + 1;
+            const isHighlighted = highlightedLines.includes(lineNum);
+            const lineVariables = variablesByLine[lineNum];
+            const highlighted = applyHighlight(line, language);
+            
+            return (
+              <CodeLineWrapper 
+                key={index} 
+                isHighlighted={isHighlighted}
+                isExecuting={isHighlighted && highlightedLines.length === 1}
+              >
+                <LineNumber>{lineNum}</LineNumber>
+                <CodeContent dangerouslySetInnerHTML={{ __html: highlighted || '&nbsp;' }} />
+                {lineVariables && lineVariables.map((v, i) => (
+                  <VariableValue key={i}>
+                    {v.name} = {String(v.value)}
+                  </VariableValue>
+                ))}
+              </CodeLineWrapper>
+            );
+          })}
         </Pre>
       </CodeContainer>
     </Container>

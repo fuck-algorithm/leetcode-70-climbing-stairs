@@ -564,7 +564,7 @@ const FormulaVisualizer: React.FC<FormulaVisualizerProps> = ({ n, state, current
         />
         <NumberMarker 
           position={19.1} // -0.618 映射到0-100的位置
-          color="#3F51B5" 
+          color="#1976D2" 
           special 
           data-value="-1/φ ≈ -0.618"
         />
